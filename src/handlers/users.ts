@@ -17,7 +17,7 @@ export function createUser(
 ) {
   return response.status(201).send({
     id: 1,
-    username: "test",
+    username: "",
     email: "hello@guys.com",
   });
 }
