@@ -19,13 +19,15 @@ export async function generateJSONFromQuery(message: String) {
     throw new Error();
   }
 
-  console.log(`debugger ${response.text}`);
+  // console.log(`debugger ${response.text}`);
 
   let text = response.text;
   text = text
     .replace(/```json\n?/g, "")
     .replace(/```\n?/g, "")
     .trim();
+
+  console.log(text);
 
   return text;
 }

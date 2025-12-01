@@ -1,25 +1,45 @@
-export interface RestaurantSearchParams {
-  action: string;
-  parameters: {
-    query: string;
-    near: string;
-    price?: string;
-    open_now?: boolean;
-  };
-}
+import * as z from "zod";
+
+// export interface RestaurantSearchParams {
+//   action: string;
+//   parameters: {
+//     query: string;
+//     near: string;
+//     price?: string;
+//     open_now?: boolean;
+//   };
+// }
+
+// export function validateRestaurantSearch(
+//   data: any,
+// ): data is RestaurantSearchParams {
+//   return (
+//     data &&
+//     data.action === "restaurant_search" &&
+//     data.parameters &&
+//     typeof data.parameters.query === "string" &&
+//     typeof data.parameters.near === "string" &&
+//     (typeof data.parameters.price === "string" ||
+//       data.parameters.price === undefined) &&
+//     (typeof data.parameters.open_now === "boolean" ||
+//       data.parameters.open_now === undefined)
+//   );
+// }
+
+export const RestaurantSearchSchema = z.object({
+  action: z.literal("restaurant_search"),
+  parameters: z.object({
+    query: z.string().min(1, "Query can't be empty"),
+    near: z.string().min(1, "Tell the location"),
+    price: z.string().optional(),
+    open_now: z.boolean().optional(),
+  }),
+});
+
+export type RestaurantSearchParams = z.infer<typeof RestaurantSearchSchema>;
 
 export function validateRestaurantSearch(
-  data: any,
-): data is RestaurantSearchParams {
-  return (
-    data &&
-    data.action === "restaurant_search" &&
-    data.parameters &&
-    typeof data.parameters.query === "string" &&
-    typeof data.parameters.near === "string" &&
-    (typeof data.parameters.price === "string" ||
-      data.parameters.price === undefined) &&
-    (typeof data.parameters.open_now === "boolean" ||
-      data.parameters.open_now === undefined)
-  );
+  data: unknown,
+): RestaurantSearchParams {
+  return RestaurantSearchSchema.parse(data);
 }
