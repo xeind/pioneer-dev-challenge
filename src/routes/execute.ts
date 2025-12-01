@@ -14,7 +14,7 @@ router.get("/execute", async (req: Request, res: Response) => {
 
   try {
     const result = await executeHandler(message);
-    console.log(result);
+    // console.log(result);
     res.json(result);
   } catch (e) {
     res.status(500);

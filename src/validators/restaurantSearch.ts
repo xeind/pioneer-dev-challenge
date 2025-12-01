@@ -1,5 +1,36 @@
 import * as z from "zod";
 
+export const RestaurantSearchSchema = z.object({
+  action: z.literal("restaurant_search"),
+  parameters: z.object({
+    query: z
+      .string()
+      .min(1, "Query can't be empty")
+      .transform((s) => s.trim()),
+    near: z
+      .string()
+      .min(1, "Tell the location")
+      .transform((s) => s.trim()),
+    price: z
+      .string()
+      .optional()
+      .transform((s) => s?.trim()),
+    open_now: z.boolean().optional(),
+    open_at: z
+      .string()
+      .optional()
+      .transform((s) => s?.trim()),
+  }),
+});
+
+export type RestaurantSearchParams = z.infer<typeof RestaurantSearchSchema>;
+
+export function validateRestaurantSearch(
+  data: unknown,
+): RestaurantSearchParams {
+  return RestaurantSearchSchema.parse(data);
+}
+
 // export interface RestaurantSearchParams {
 //   action: string;
 //   parameters: {
@@ -25,21 +56,3 @@ import * as z from "zod";
 //       data.parameters.open_now === undefined)
 //   );
 // }
-
-export const RestaurantSearchSchema = z.object({
-  action: z.literal("restaurant_search"),
-  parameters: z.object({
-    query: z.string().min(1, "Query can't be empty"),
-    near: z.string().min(1, "Tell the location"),
-    price: z.string().optional(),
-    open_now: z.boolean().optional(),
-  }),
-});
-
-export type RestaurantSearchParams = z.infer<typeof RestaurantSearchSchema>;
-
-export function validateRestaurantSearch(
-  data: unknown,
-): RestaurantSearchParams {
-  return RestaurantSearchSchema.parse(data);
-}
