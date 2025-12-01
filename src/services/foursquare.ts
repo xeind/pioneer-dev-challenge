@@ -1,13 +1,5 @@
 import { RestaurantSearchParams } from "../validators/restaurantSearch";
 
-export interface FoursquareSearchParams {
-  query: string;
-  near: string;
-  open_now?: boolean;
-  price?: string;
-  open_at?: string;
-}
-
 // export const FoursquareSearchSchema = z.object({
 //   query: z.string().min(1, "Query can't be empty"),
 //   near: z.string().min(1, "Query can't be empty"),
@@ -23,6 +15,14 @@ export interface FoursquareSearchParams {
 // ): FoursquareSearchParams {
 //   return FoursquareSearchSchema.parse(data);
 // }
+
+export interface FoursquareSearchParams {
+  query: string;
+  near: string;
+  open_now?: boolean;
+  price?: string;
+  open_at?: string;
+}
 
 export function normalizeFoursquareParams(
   llmData: RestaurantSearchParams,
@@ -63,6 +63,10 @@ export function buildFoursquareURL(params: FoursquareSearchParams) {
 export async function searchRestaurants(params: FoursquareSearchParams) {
   const apiKey = process.env.FSQ_KEY || "";
 
+  if (!apiKey) {
+    throw new Error("FSQ_KEY is not set");
+  }
+
   const url = buildFoursquareURL(params);
 
   const response = await fetch(url, {
@@ -73,6 +77,13 @@ export async function searchRestaurants(params: FoursquareSearchParams) {
       "X-Places-Api-Version": "2025-06-17",
     },
   });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Foursquare API Error: ${response.status} ${response.text} - ${errorText}`,
+    );
+  }
 
   return response.json();
 }

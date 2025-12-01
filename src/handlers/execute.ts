@@ -5,11 +5,11 @@ import {
 import { generateJSONFromQuery } from "../services/llm";
 import { validateRestaurantSearch } from "../validators/restaurantSearch";
 
-export async function executeHandler(message: String) {
+export async function executeHandler(message: string) {
   const convertedQuery = await generateJSONFromQuery(message);
 
   if (!convertedQuery) {
-    throw new Error();
+    throw new Error("Failed to generate JSON from query");
   }
 
   const parsedQuery = JSON.parse(convertedQuery);

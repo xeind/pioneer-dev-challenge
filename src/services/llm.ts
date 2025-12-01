@@ -5,7 +5,7 @@ require("dotenv").config();
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
-export async function generateJSONFromQuery(message: String) {
+export async function generateJSONFromQuery(message: string) {
   const prompt = RESTAURANT_SEARCH_PROMPT;
   // console.log(prompt);
 
@@ -13,13 +13,11 @@ export async function generateJSONFromQuery(message: String) {
     model: "gemini-2.5-flash",
     contents: `${prompt}\n${message}`,
   });
-  console.log(response);
+  // console.log(response);
 
   if (!response.text) {
-    throw new Error();
+    throw new Error("LLM returned an empty response");
   }
-
-  // console.log(`debugger ${response.text}`);
 
   let text = response.text;
   text = text
@@ -27,7 +25,7 @@ export async function generateJSONFromQuery(message: String) {
     .replace(/```\n?/g, "")
     .trim();
 
-  console.log(text);
+  // console.log(text);
 
   return text;
 }

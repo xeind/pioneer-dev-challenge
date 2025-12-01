@@ -13,6 +13,7 @@ Schema:
 }
 Rules:
 - Currently open → "open_now": true
-- "cheap" → "price": "1"
+- "cheap sushi" → {"query": "sushi", "price": "1"}
+- "expensive Italian downtown LA" → {"query": "Italian", "near": "downtown Los Angeles", "price": "4"}
 Return ONLY VALID JSON. No extra text
 `.trim();

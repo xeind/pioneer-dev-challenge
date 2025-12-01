@@ -17,7 +17,12 @@ router.get("/execute", async (req: Request, res: Response) => {
     // console.log(result);
     res.json(result);
   } catch (e) {
-    res.status(500);
+    console.error("Error in executeHandler:", e);
+    const errorMessage = e instanceof Error ? e.message : "Unknown error";
+    res.status(500).json({
+      error: "Internal server error",
+      message: errorMessage,
+    });
   }
 });
 
