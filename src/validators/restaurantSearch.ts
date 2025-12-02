@@ -16,10 +16,10 @@ export const RestaurantSearchSchema = z.object({
       .optional()
       .transform((s) => s?.trim()),
     open_now: z.boolean().optional(),
-    open_at: z
-      .string()
-      .optional()
-      .transform((s) => s?.trim()),
+    // open_at: z
+    //   .string()
+    //   .optional()
+    //   .transform((s) => s?.trim()),
   }),
 });
 

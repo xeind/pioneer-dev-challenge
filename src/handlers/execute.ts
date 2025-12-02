@@ -18,6 +18,12 @@ export async function executeHandler(message: string) {
   console.log(`Validated LLM: `, validatedLLM);
 
   const foursquareParams = normalizeFoursquareParams(validatedLLM);
+  if (!validatedLLM.parameters.query) {
+    return {
+      error: "Location required",
+      message: "Please specify a location. (e.g., 'korean chicken in LA')",
+    };
+  }
   // console.log(foursquareParams);
 
   const restaurants = await searchRestaurants(foursquareParams);

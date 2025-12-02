@@ -21,7 +21,7 @@ export interface FoursquareSearchParams {
   near: string;
   open_now?: boolean;
   price?: string;
-  open_at?: string;
+  // open_at?: string;
 }
 
 export function normalizeFoursquareParams(
@@ -32,7 +32,7 @@ export function normalizeFoursquareParams(
     near: llmData.parameters.near,
     open_now: llmData.parameters.open_now,
     price: llmData.parameters.price,
-    open_at: llmData.parameters.open_at,
+    // open_at: llmData.parameters.open_at,
   };
 }
 
