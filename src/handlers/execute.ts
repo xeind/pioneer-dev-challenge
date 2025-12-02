@@ -15,7 +15,7 @@ export async function executeHandler(message: string) {
   const parsedQuery = JSON.parse(convertedQuery);
 
   const validatedLLM = validateRestaurantSearch(parsedQuery);
-  console.log(`Validated LLM: `, validatedLLM);
+  // console.log(`Validated LLM: `, validatedLLM);
 
   const foursquareParams = normalizeFoursquareParams(validatedLLM);
   if (!validatedLLM.parameters.query) {
