@@ -16,6 +16,80 @@ This is an LLM-driven restaurant search API that converts user query parameters 
 - Foursquare Place API
 - Zod (validator)
 
+# Local Setup
+
+## Prerequisites
+
+- Node.js (v16 or higher)
+- npm or yarn
+- Google Gemini API key
+- Foursquare API key
+
+## Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/xeind/pioneer-dev-challenge.git
+   cd pioneer-dev-challenge
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Create environment file**
+
+   Create a `.env` file in the root directory:
+
+   ```env
+   GEMINI_API_KEY=your_google_gemini_api_key
+   FSQ_KEY=your_foursquare_api_key
+   PORT=3000
+   ```
+
+4. **Build the project**
+
+   ```bash
+   npm run build
+   ```
+
+5. **Start the server**
+
+   ```bash
+   npm start
+   ```
+
+   Or for development with auto-reload:
+
+   ```bash
+   npm run start:dev
+   ```
+
+6. **Verify it's running**
+
+   Server should start on `http://localhost:3000`
+
+## Testing Locally
+
+After setup, you can test with:
+
+**Browser:**
+
+```
+http://localhost:3000/api/execute?message=cheap%20sushi%20in%20LA&code=pioneerdevai
+```
+
+**Postman:**
+
+Use Postman Agent for localhost
+
+- Method: GET
+- URL: `http://localhost:3000/api/execute`
+- Params: `message` = `cheap sushi in LA`, `code` = `pioneerdevai`
+
 # Documentation
 
 ## Authentication
@@ -61,8 +135,10 @@ GET https://pioneer-dev-challenge.onrender.com/api/execute?message=cheap chicken
 
 # Testing Guide
 
+## Testing Deployed Version
+
 1. Create a Postman GET request
-2. Set URL: `https://pioneer-dev-challenge.onrender.com`
+2. Set URL: `https://pioneer-dev-challenge.onrender.com/api/execute`
 3. Add Query Parameters:
 
 - Key: `message`, Value: `chicken restaurant at downtown LA`
@@ -76,32 +152,76 @@ https://pioneer-dev-challenge.onrender.com/api/execute?message=chicken restauran
 
 5. Click Send
 
-## LLM Query
+**Note:** First request to deployed version may be slow (15-30 seconds) due to Render free tier cold start. Subsequent requests will be faster (2-4 seconds).
+
+## LLM Query Format
+
+Example of what the LLM generates:
 
 ```json
 {
-  action: restaurant_search,
-  parameters: {
-    query: sushi,
-    near: Los Angeles,
-    price: 1,
-    open_now: true
+  "action": "restaurant_search",
+  "parameters": {
+    "query": "sushi",
+    "near": "Los Angeles",
+    "price": "1",
+    "open_now": true
   }
 }
 ```
 
 ## Test Queries
 
+### Simple Query
+
+```
 message: sushi in Los Angeles
+```
 
 ### Price Filters
 
+```
 message: cheap chicken place in Manila
 message: expensive French Restaurant in Beverly Hills
+```
 
 ### Status Filters
 
+```
 message: chicken restaurants open now in Santa Monica
+```
+
+# Project Structure
+
+```
+pioneer-dev-challenge/
+├── src/
+│   ├── handlers/          # Business logic layer
+│   │   └── execute.ts     # Main request orchestration
+│   ├── routes/            # API endpoint definitions
+│   │   └── execute.ts     # /api/execute route
+│   ├── services/          # External API integrations
+│   │   ├── llm.ts         # Google Gemini AI service
+│   │   └── foursquare.ts  # Foursquare Places API service
+│   ├── validators/        # Data validation schemas
+│   │   └── restaurantSearch.ts  # Zod schemas for validation
+│   ├── prompts/           # LLM prompt templates
+│   │   └── restaurantSearchPrompt.ts  # Structured prompt for Gemini
+│   └── server.ts          # Express app entry point
+├── .env                   # Environment variables (not committed)
+├── .gitignore            # Git ignore rules
+├── package.json          # Dependencies and scripts
+├── tsconfig.json         # TypeScript configuration
+└── README.md             # This file
+```
+
+**Architecture:**
+
+- **routes/** - HTTP endpoint definitions, request/response handling
+- **handlers/** - Business logic, orchestrates the flow between services
+- **services/** - External API integrations (LLM, Foursquare)
+- **validators/** - Zod schemas for runtime type validation
+- **prompts/** - LLM prompt engineering
 
 # How it works
 
@@ -110,13 +230,41 @@ message: chicken restaurants open now in Santa Monica
 3. LLM Processing → Gemini AI converts the message into JSON
 4. JSON gets validated by Zod
 5. The parameters are normalized to fit Foursquare API call
-6. Foursquare API call → Queries restaurant databse
+6. Foursquare API call → Queries restaurant database
 7. Response → Returns restaurants data to user
+
+# Assumptions & Limitations
+
+## Assumptions
+
+- **Language:** User queries are in English
+- **Location format:** Location names are recognizable by Foursquare (e.g., "Los Angeles", "downtown LA", "Manila", "India")
+- **Price mapping:**
+  - "cheap" or "affordable" → price level 1
+  - "moderate" → price level 2
+  - "upscale" → price level 3
+  - "expensive" → price level 4
+- **Time context:** "open now" uses current server time
+- **Valid API keys:** Assumes Google Gemini and Foursquare API keys are valid and have available quota
+- **Basic REST knowledge:** Users understand how to make GET requests with query parameters
 
 ## Limitations
 
-- If location is not specified in query, it will assume "United States" for the location
-- LLM responses may vary
-- Error messages for all the various instances might not be supporte yet
-- Complex queries may produce unexpected results
-- Deployed using Render Free Tier so first requests may be slow
+### Location Handling
+
+- **Default behavior:** If no location is specified (e.g., just "pizza" or "mexican food"), the system defaults to "United States" as the search area
+- **Reasoning:** Ensures results have geographic relevance rather than returning random restaurants globally
+- **Impact:** Queries without explicit location may return very broad results across the entire US
+
+### LLM Behavior
+
+- **Variability:** LLM responses may vary slightly for identical queries due to AI's non-deterministic nature
+- **Parsing inconsistency:** Very ambiguous, gibberish, or highly complex queries may produce unexpected JSON or fail validation
+- **Language limitation:** Only supports English language queries
+
+### Performance & Deployment
+
+- **Response time:** Average 2-4 seconds per request (includes LLM processing + Foursquare API call)
+- **Cold start:** First request after inactivity on Render free tier may take 15-30 seconds
+- **No caching:** Each request makes fresh API calls (no result caching implemented)
+- **No connection pooling:** Each request creates new connections to external APIs

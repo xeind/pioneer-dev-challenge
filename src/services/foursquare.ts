@@ -84,12 +84,12 @@ export async function searchRestaurants(params: FoursquareSearchParams) {
       `Foursquare API Error: ${response.status} ${response.text} - ${errorText}`,
     );
   }
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `Foursquare API Error: ${response.status} ${response.text} - ${errorText}`,
-    );
-  }
+  // if (!response.ok) {
+  //   const errorText = await response.text();
+  //   throw new Error(
+  //     `Foursquare API Error: ${response.status} ${response.text} - ${errorText}`,
+  //   );
+  // }
 
   return response.json();
 }
